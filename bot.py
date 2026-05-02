@@ -139,7 +139,7 @@ def clean_audio_title(info):
     return title
 
 
-def build_download_options(download_dir, mode, use_cookies=True, youtube_android=False):
+def build_download_options(download_dir, mode, use_cookies=True, youtube_client=None):
     cookie_file = get_cookie_file()
     ydl_opts = {
         "outtmpl": str(download_dir / "%(uploader).100B - %(title).200B.%(ext)s"),
@@ -148,8 +148,8 @@ def build_download_options(download_dir, mode, use_cookies=True, youtube_android
         **({"cookiefile": cookie_file} if cookie_file and use_cookies else {}),
     }
 
-    if youtube_android:
-        ydl_opts["extractor_args"] = {"youtube": {"player_client": ["android"]}}
+    if youtube_client:
+        ydl_opts["extractor_args"] = {"youtube": {"player_client": [youtube_client]}}
 
     if mode == "audio":
         ydl_opts.update(
@@ -182,18 +182,27 @@ def extract_info_with_fallback(url, download_dir, mode):
     option_sets = []
 
     if is_youtube_url(url):
-        option_sets.append(build_download_options(download_dir, mode, use_cookies=False, youtube_android=True))
+        option_sets.extend(
+            [
+                ("youtube:android", build_download_options(download_dir, mode, use_cookies=False, youtube_client="android")),
+                (
+                    "youtube:tv_embedded",
+                    build_download_options(download_dir, mode, use_cookies=False, youtube_client="tv_embedded"),
+                ),
+            ]
+        )
 
-    option_sets.append(build_download_options(download_dir, mode))
+    option_sets.append(("default", build_download_options(download_dir, mode)))
     last_error = None
 
-    for ydl_opts in option_sets:
+    for label, ydl_opts in option_sets:
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(url, download=True)
                 info = normalize_info(info)
                 return info, Path(ydl.prepare_filename(info))
         except Exception as exc:
+            print(f"{label} download failed: {exc}", flush=True)
             last_error = exc
 
     raise last_error
