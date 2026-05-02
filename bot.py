@@ -26,10 +26,16 @@ def load_env_file(path=".env"):
 
 load_env_file()
 
-TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TOKEN = (
+    os.getenv("TELEGRAM_BOT_TOKEN")
+    or os.getenv("BOT_TOKEN")
+    or os.getenv("TELEGRAM_TOKEN")
+)
 
 if not TOKEN:
-    raise RuntimeError("TELEGRAM_BOT_TOKEN environment variable is not set")
+    raise RuntimeError(
+        "Telegram bot token is not set. Add TELEGRAM_BOT_TOKEN in your server environment variables."
+    )
 
 bot = telebot.TeleBot(TOKEN)
 DOWNLOADS_DIR = Path("downloads")
@@ -269,16 +275,15 @@ def download_and_send(chat_id, url, mode):
 def start(message):
     bot.reply_to(
         message,
-        "Salom! 🎵\n\n"
+        "Salom!\n\n"
         "Link yuboring, yuklab beraman:\n"
-        "• YouTube\n"
-        "• Spotify\n"
-        "• TikTok\n"
-        "• Instagram\n"
-        "• Twitter/X\n\n"
-        "Audio MP3 yoki Video MP4 — tanlov sizniki.",
+        "- YouTube\n"
+        "- Spotify\n"
+        "- TikTok\n"
+        "- Instagram\n"
+        "- Twitter/X\n\n"
+        "Audio MP3 yoki Video MP4 - tanlov sizniki.",
     )
-
 
 @bot.message_handler(func=lambda message: True)
 def handle(message):

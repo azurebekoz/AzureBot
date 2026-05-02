@@ -22,4 +22,15 @@ Run the bot:
 python bot.py
 ```
 
+## Server Deployment
+
+On Render, Railway, Fly.io, Docker, or any other server, `.env` is usually not uploaded.
+Add this environment variable in the hosting dashboard:
+
+```env
+TELEGRAM_BOT_TOKEN=your_real_bot_token
+```
+
+`BOT_TOKEN` and `TELEGRAM_TOKEN` are also supported as fallback names.
+
 For Instagram stories or private content, export browser cookies and place them in `cookies.txt`.
