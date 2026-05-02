@@ -114,15 +114,13 @@ def clean_audio_title(info):
 
 
 def build_download_options(download_dir, mode):
+    cookie_file = get_cookie_file()
     ydl_opts = {
         "outtmpl": str(download_dir / "%(uploader).100B - %(title).200B.%(ext)s"),
         "noplaylist": True,
         "quiet": True,
+        **({"cookiefile": cookie_file} if cookie_file else {}),
     }
-
-    cookie_file = get_cookie_file()
-    if cookie_file:
-        ydl_opts["cookiefile"] = cookie_file
 
     if mode == "audio":
         ydl_opts.update(
