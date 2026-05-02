@@ -1,0 +1,7 @@
+.venv/
+.env
+cookies.txt
+instagram_cookies.txt
+downloads/
+__pycache__/
+*.pyc
