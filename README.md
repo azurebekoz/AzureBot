@@ -41,3 +41,18 @@ On a server, upload the cookie file with your app and optionally set:
 ```env
 YTDLP_COOKIE_FILE=cookies.txt
 ```
+
+If the host does not support file uploads, put the cookie file content in an environment variable instead.
+Recommended for Railway:
+
+```env
+YTDLP_COOKIES_B64=base64_encoded_cookies_txt
+```
+
+Create the value on Windows PowerShell:
+
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("cookies.txt"))
+```
+
+The bot will create `/tmp/cookies.txt` automatically at startup.

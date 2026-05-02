@@ -1,3 +1,4 @@
+import base64
 import os
 import re
 import shutil
@@ -64,7 +65,32 @@ def is_youtube_url(url):
     return "youtube.com/" in lower_url or "youtu.be/" in lower_url
 
 
+def write_cookie_file_from_env():
+    cookie_b64 = os.getenv("YTDLP_COOKIES_B64")
+    cookie_content = os.getenv("YTDLP_COOKIES_CONTENT")
+
+    if not cookie_b64 and not cookie_content:
+        return None
+
+    cookie_path = Path(os.getenv("YTDLP_COOKIE_FILE", "/tmp/cookies.txt"))
+    if os.name == "nt" and str(cookie_path).startswith("/tmp/"):
+        cookie_path = Path("cookies.txt")
+
+    cookie_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if cookie_b64:
+        cookie_path.write_bytes(base64.b64decode(cookie_b64))
+    else:
+        cookie_path.write_text(cookie_content, encoding="utf-8")
+
+    return str(cookie_path)
+
+
 def get_cookie_file():
+    env_cookie_file = write_cookie_file_from_env()
+    if env_cookie_file:
+        return env_cookie_file
+
     cookie_file = os.getenv("YTDLP_COOKIE_FILE") or os.getenv("INSTAGRAM_COOKIE_FILE")
     candidates = [Path(cookie_file)] if cookie_file else []
     candidates.extend([Path("cookies.txt"), Path("instagram_cookies.txt")])
