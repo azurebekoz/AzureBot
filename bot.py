@@ -59,6 +59,11 @@ def is_instagram_url(url):
     return "instagram.com/" in url.lower()
 
 
+def is_youtube_url(url):
+    lower_url = url.lower()
+    return "youtube.com/" in lower_url or "youtu.be/" in lower_url
+
+
 def get_cookie_file():
     cookie_file = os.getenv("YTDLP_COOKIE_FILE") or os.getenv("INSTAGRAM_COOKIE_FILE")
     candidates = [Path(cookie_file)] if cookie_file else []
@@ -211,6 +216,19 @@ def friendly_error_message(exc, url):
             "Brauzerdan cookies export qilib loyiha papkasiga `cookies.txt` nomi bilan qo'ying, "
             "keyin botni qayta ishga tushiring.\n\n"
             "Oddiy public Reel/Post linklar odatda cookiesiz ham ishlaydi."
+        )
+
+    if is_youtube_url(url) and (
+        "sign in to confirm" in lower_text
+        or "not a bot" in lower_text
+        or "cookies" in lower_text
+    ):
+        return (
+            "YouTube server IP'ni bot deb tekshiryapti.\n\n"
+            "Bu hosting/containerlarda ko'p uchraydi. YouTube yuklash ishlashi uchun "
+            "`cookies.txt` kerak bo'ladi yoki botni boshqa server/IP'da ishga tushirish kerak.\n\n"
+            "Brauzerdan YouTube cookies export qilib serverga `cookies.txt` sifatida joylang "
+            "yoki hostingda `YTDLP_COOKIE_FILE` env variable bilan cookie fayl yo'lini ko'rsating."
         )
 
     return f"Xatolik: {text}"
