@@ -139,14 +139,17 @@ def clean_audio_title(info):
     return title
 
 
-def build_download_options(download_dir, mode):
+def build_download_options(download_dir, mode, use_cookies=True, youtube_android=False):
     cookie_file = get_cookie_file()
     ydl_opts = {
         "outtmpl": str(download_dir / "%(uploader).100B - %(title).200B.%(ext)s"),
         "noplaylist": True,
         "quiet": True,
-        **({"cookiefile": cookie_file} if cookie_file else {}),
+        **({"cookiefile": cookie_file} if cookie_file and use_cookies else {}),
     }
+
+    if youtube_android:
+        ydl_opts["extractor_args"] = {"youtube": {"player_client": ["android"]}}
 
     if mode == "audio":
         ydl_opts.update(
@@ -164,8 +167,7 @@ def build_download_options(download_dir, mode):
     else:
         ydl_opts.update(
             {
-                "format": "bestvideo+bestaudio/best",
-                "merge_output_format": "mp4",
+                "format": "best[ext=mp4]/best",
             }
         )
 
@@ -174,6 +176,27 @@ def build_download_options(download_dir, mode):
         ydl_opts["ffmpeg_location"] = ffmpeg_location
 
     return ydl_opts
+
+
+def extract_info_with_fallback(url, download_dir, mode):
+    option_sets = []
+
+    if is_youtube_url(url):
+        option_sets.append(build_download_options(download_dir, mode, use_cookies=False, youtube_android=True))
+
+    option_sets.append(build_download_options(download_dir, mode))
+    last_error = None
+
+    for ydl_opts in option_sets:
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url, download=True)
+                info = normalize_info(info)
+                return info, Path(ydl.prepare_filename(info))
+        except Exception as exc:
+            last_error = exc
+
+    raise last_error
 
 
 def find_downloaded_file(download_dir, suffix=None):
@@ -269,12 +292,7 @@ def download_and_send(chat_id, url, mode):
                 raise ValueError("Spotify linklar faqat Audio MP3 qilib yuboriladi")
             url = get_spotify_search_query(url)
 
-        ydl_opts = build_download_options(download_dir, mode)
-
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            info = normalize_info(info)
-            prepared_filename = Path(ydl.prepare_filename(info))
+        info, prepared_filename = extract_info_with_fallback(url, download_dir, mode)
 
         if mode == "audio":
             filename = prepared_filename.with_suffix(".mp3")

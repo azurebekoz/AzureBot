@@ -56,3 +56,6 @@ Create the value on Windows PowerShell:
 ```
 
 The bot will create `/tmp/cookies.txt` automatically at startup.
+
+For YouTube on hosting providers, the bot first tries an Android extractor client without cookies,
+then falls back to the configured cookies if needed.
