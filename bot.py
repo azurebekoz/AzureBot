@@ -275,6 +275,17 @@ def friendly_error_message(exc, url):
         )
 
     if is_youtube_url(url) and (
+        "cookies are no longer valid" in lower_text
+        or "cookies have been rotated" in lower_text
+        or "provided youtube account cookies are no longer valid" in lower_text
+    ):
+        return (
+            "YouTube cookies eskirgan yoki browser tomonidan rotate qilingan.\n\n"
+            "Yangi `cookies.txt` export qiling, uni base64 qilib Railway Variables ichidagi "
+            "`YTDLP_COOKIES_B64` qiymatini yangilang, keyin redeploy qiling."
+        )
+
+    if is_youtube_url(url) and (
         "sign in to confirm" in lower_text
         or "not a bot" in lower_text
         or "cookies" in lower_text
