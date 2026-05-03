@@ -2,3 +2,4 @@ pyTelegramBotAPI==4.33.0
 yt-dlp==2026.3.17
 spotdl==4.4.4
 requests
+imageio-ffmpeg

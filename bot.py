@@ -44,9 +44,20 @@ PENDING_DOWNLOADS = {}
 
 
 def get_ffmpeg_location():
+    ffmpeg_location = os.getenv("FFMPEG_LOCATION")
+    if ffmpeg_location:
+        return ffmpeg_location
+
     ffmpeg_path = shutil.which("ffmpeg")
     if ffmpeg_path:
         return str(Path(ffmpeg_path).parent)
+
+    try:
+        import imageio_ffmpeg
+
+        return imageio_ffmpeg.get_ffmpeg_exe()
+    except Exception as exc:
+        print(f"imageio-ffmpeg lookup failed: {exc}", flush=True)
 
     winget_packages = Path(os.getenv("LOCALAPPDATA", "")) / "Microsoft" / "WinGet" / "Packages"
     matches = list(winget_packages.glob("Gyan.FFmpeg_*/*/bin/ffmpeg.exe"))
