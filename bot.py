@@ -44,6 +44,10 @@ PENDING_DOWNLOADS = {}
 
 
 def get_ffmpeg_location():
+    ffmpeg_path = shutil.which("ffmpeg")
+    if ffmpeg_path:
+        return str(Path(ffmpeg_path).parent)
+
     winget_packages = Path(os.getenv("LOCALAPPDATA", "")) / "Microsoft" / "WinGet" / "Packages"
     matches = list(winget_packages.glob("Gyan.FFmpeg_*/*/bin/ffmpeg.exe"))
     if matches:

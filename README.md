@@ -33,6 +33,8 @@ TELEGRAM_BOT_TOKEN=your_real_bot_token
 
 `BOT_TOKEN` and `TELEGRAM_TOKEN` are also supported as fallback names.
 
+Railway/Nixpacks installs FFmpeg from `nixpacks.toml`. FFmpeg is required for MP3 conversion.
+
 For Instagram stories, private content, or YouTube "Sign in to confirm you're not a bot" errors,
 export browser cookies and place them in `cookies.txt`.
 
