@@ -260,6 +260,13 @@ def normalize_info(info):
     return info
 
 
+def delete_message_safe(chat_id, message_id):
+    try:
+        bot.delete_message(chat_id, message_id)
+    except Exception as exc:
+        print(f"delete message failed: {exc}", flush=True)
+
+
 def friendly_error_message(exc, url):
     text = str(exc)
     lower_text = text.lower()
@@ -396,13 +403,17 @@ def download_callback(call):
         bot.answer_callback_query(call.id, "Bu link eskirgan. Qayta yuboring.")
         return
 
+    chat_id = call.message.chat.id
     bot.answer_callback_query(call.id, "Yuklanmoqda...")
-    bot.send_message(call.message.chat.id, "Yuklanmoqda...")
+    status_message = bot.send_message(chat_id, "Yuklanmoqda...")
 
     try:
-        download_and_send(call.message.chat.id, url, mode)
+        download_and_send(chat_id, url, mode)
     except Exception as exc:
-        bot.send_message(call.message.chat.id, friendly_error_message(exc, url))
+        bot.send_message(chat_id, friendly_error_message(exc, url))
+    finally:
+        delete_message_safe(chat_id, status_message.message_id)
+        delete_message_safe(chat_id, call.message.message_id)
 
 
 if __name__ == "__main__":
